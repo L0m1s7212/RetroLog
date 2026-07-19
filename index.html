@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RetroLog</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #0B0D17; --bg-secondary: #131523; --bg-tertiary: #1E2136;
+            --blurple: #5865F2; --blurple-hover: #4752C4;
+            --accent-glow: rgba(88, 101, 242, 0.4);
+            --text-normal: #dbdee1; --text-muted: #949ba4; --text-header: #ffffff;
+            --success: #23a559; --warning: #f23f43;
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+        
+        * { box-sizing: border-box; scroll-behavior: smooth; }
+        body { 
+            font-family: 'Inter', sans-serif; background-color: var(--bg-main); 
+            color: var(--text-normal); margin: 0; padding: 0; overflow-x: hidden;
+            background-image: radial-gradient(circle at 15% 50%, rgba(88, 101, 242, 0.08), transparent 25%), 
+                              radial-gradient(circle at 85% 30%, rgba(235, 69, 158, 0.05), transparent 25%);
+        }
+
+        /* --- NAWIGACJA --- */
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 5vw; background: rgba(11, 13, 23, 0.9); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--glass-border); }
+        .logo { font-size: 26px; font-weight: 900; color: var(--text-header); letter-spacing: -0.5px;}
+        .logo span { color: var(--blurple); }
+        .nav-links { display: flex; align-items: center; gap: 25px; }
+        .nav-links a { color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 14px; transition: 0.2s;}
+        .nav-links a:hover { color: var(--text-header); }
+        .lang-switch { background: var(--bg-tertiary); color: var(--text-normal); border: 1px solid var(--glass-border); padding: 8px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; outline: none; font-family: 'Inter', sans-serif;}
+
+        /* --- HERO SECTION --- */
+        .hero { text-align: center; padding: 100px 20px 80px; max-width: 900px; margin: 0 auto; }
+        .hero-badge { display: inline-block; background: rgba(88, 101, 242, 0.15); color: #8ea1e1; padding: 8px 20px; border-radius: 20px; font-size: 13px; font-weight: 800; text-transform: uppercase; margin-bottom: 25px; border: 1px solid rgba(88, 101, 242, 0.3); letter-spacing: 1px;}
+        .hero h1 { font-size: 64px; font-weight: 900; color: var(--text-header); margin: 0 0 25px; line-height: 1.1; letter-spacing: -2px;}
+        .hero p { font-size: 18px; color: var(--text-muted); line-height: 1.6; margin-bottom: 45px; font-weight: 400;}
+        
+        .hero-btn { 
+            background: linear-gradient(135deg, var(--blurple), #707df5); color: white; padding: 20px 45px; 
+            border-radius: 12px; font-size: 18px; font-weight: 800; text-decoration: none; border: none;
+            cursor: pointer; transition: 0.3s; box-shadow: 0 10px 30px var(--accent-glow); display: inline-block;
+        }
+        .hero-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(88, 101, 242, 0.6); }
+
+        .trust-bar { display: flex; justify-content: center; gap: 40px; margin-top: 60px; flex-wrap: wrap;}
+        .trust-item { display: flex; align-items: center; gap: 10px; color: var(--text-muted); font-size: 14px; font-weight: 600;}
+        .trust-icon { font-size: 20px; }
+
+        /* --- INSTRUKCJA --- */
+        .guide-section { max-width: 950px; margin: 0 auto 60px; padding: 0 20px; text-align: center; scroll-margin-top: 110px;}
+        .guide-title { font-size: 28px; font-weight: 900; color: var(--text-header); margin-bottom: 20px;}
+        .external-btn { display: inline-block; background: var(--bg-tertiary); color: var(--text-normal); text-decoration: none; padding: 12px 25px; border-radius: 8px; font-weight: 600; border: 1px solid var(--glass-border); transition: 0.2s; margin-bottom: 30px;}
+        .external-btn:hover { background: var(--bg-secondary); border-color: var(--blurple); }
+        
+        .steps-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; text-align: left;}
+        .step-card { background: rgba(30, 33, 54, 0.4); border: 1px solid var(--glass-border); padding: 25px; border-radius: 12px;}
+        .step-num { display: inline-block; background: var(--blurple); color: white; width: 34px; height: 34px; text-align: center; line-height: 34px; border-radius: 50%; font-weight: 900; margin-bottom: 15px; font-size: 16px;}
+        .step-card h3 { margin: 0 0 12px; font-size: 17px; color: var(--text-header); font-weight: 800;}
+        .step-card p { margin: 0; font-size: 14px; color: var(--text-muted); line-height: 1.6;}
+
+        /* --- SKANER (GŁÓWNY KONTENER) --- */
+        .app-container { background: rgba(19, 21, 35, 0.6); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); padding: 40px; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); max-width: 800px; width: 90%; margin: 0 auto 100px; transition: box-shadow 1s; scroll-margin-top: 100px;}
+        
+        .input-group { margin-bottom: 30px; position: relative; }
+        .input-group label { display: block; color: var(--text-header); font-size: 15px; font-weight: 800; margin-bottom: 8px;}
+        .desc { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 6px; border-left: 3px solid var(--blurple);}
+        
+        input[type="file"], input[type="text"], input[type="number"], select { 
+            width: 100%; padding: 15px; background-color: rgba(30, 33, 54, 0.8); 
+            border: 1px solid var(--glass-border); border-radius: 8px; color: var(--text-normal); font-size: 15px; box-sizing: border-box; transition: 0.2s;
+        }
+        input[type="text"]:focus, input[type="number"]:focus, select:focus { border-color: var(--blurple); outline: none; background-color: var(--bg-tertiary); box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.2);}
+        
+        input[type="file"]::file-selector-button { background-color: var(--blurple); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin-right: 15px; transition: 0.2s; font-weight: 800; font-family: 'Inter', sans-serif;}
+        input[type="file"]::file-selector-button:hover { background-color: var(--blurple-hover); }
+        
+        .start-btn { width: 100%; background: linear-gradient(135deg, var(--success), #2ee076); color: #000; border: none; padding: 20px; border-radius: 8px; font-size: 18px; font-weight: 900; cursor: pointer; transition: 0.3s; margin-top: 15px; text-transform: uppercase; letter-spacing: 1px;}
+        .start-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(35, 165, 89, 0.4); }
+        .start-btn:disabled { background: var(--bg-tertiary); color: var(--text-muted); cursor: not-allowed; box-shadow: none; transform: none; }
+        
+        .progress-container { margin-top: 30px; display: none; background: rgba(0,0,0,0.3); padding: 25px; border-radius: 12px; border: 1px solid var(--glass-border);}
+        .progress-bar { width: 100%; background-color: var(--bg-main); border-radius: 10px; overflow: hidden; height: 16px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);}
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--blurple), #eb459e); width: 0%; transition: width 0.2s; }
+        .progress-text { text-align: center; margin-top: 12px; font-size: 14px; color: var(--text-header); font-weight: 600;}
+        
+        /* --- DASHBOARD WYNIKÓW --- */
+        .dashboard { display: none; animation: fadeIn 0.8s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .global-banner { background: linear-gradient(135deg, rgba(88,101,242,0.1), rgba(235,69,158,0.1)); padding: 25px; border-radius: 12px; border: 1px solid var(--glass-border); margin-bottom: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: center; }
+        .global-banner .banner-title { font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;}
+        .global-banner span { font-size: 28px; font-weight: 900; color: var(--text-header); display: block; margin-top: 8px; text-shadow: 0 0 20px rgba(255,255,255,0.2);}
+        
+        .filters-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+
+        .channel-list { background-color: rgba(11, 13, 23, 0.5); border: 1px solid var(--glass-border); border-radius: 8px; margin-top: 15px; max-height: 350px; overflow-y: auto; }
+        .channel-list::-webkit-scrollbar { width: 8px; }
+        .channel-list::-webkit-scrollbar-track { background: transparent; }
+        .channel-list::-webkit-scrollbar-thumb { background: var(--bg-tertiary); border-radius: 4px; }
+
+        .dropdown-item { padding: 15px 20px; cursor: pointer; border-bottom: 1px solid var(--glass-border); color: var(--text-normal); transition: 0.2s; display: flex; justify-content: space-between; align-items: center;}
+        .dropdown-item:last-child { border-bottom: none; }
+        .dropdown-item:hover { background-color: rgba(88, 101, 242, 0.15); padding-left: 25px; border-left: 3px solid var(--blurple);}
+        .item-name { font-weight: 600; font-size: 14px;}
+        .item-stats { color: var(--text-muted); font-size: 13px; margin-left: 10px; white-space: nowrap; font-weight: 600;}
+
+        /* Kafelki Statystyk */
+        .stat-card { background: rgba(30, 33, 54, 0.6); padding: 20px; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--glass-border); position: relative; transition: 0.3s;}
+        .stat-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.15);}
+        .stat-card.highlight { background: linear-gradient(135deg, var(--blurple), var(--blurple-hover)); border: none; box-shadow: 0 10px 20px rgba(88, 101, 242, 0.2);}
+        .stat-card.highlight .stat-title, .stat-card.highlight .stat-sub { color: rgba(255,255,255,0.8); }
+        .stat-card.highlight .stat-value { color: white; }
+        
+        .stat-title { color: var(--text-muted); font-size: 12px; text-transform: uppercase; font-weight: 800; margin-bottom: 8px; letter-spacing: 0.5px;}
+        .stat-value { color: var(--text-header); font-size: 24px; font-weight: 900; margin-bottom: 6px;}
+        .stat-sub { font-size: 12px; color: var(--text-muted); line-height: 1.4;}
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+        /* Czat */
+        .chat-section { margin-top: 40px; border-top: 1px solid var(--glass-border); padding-top: 30px; display: none; }
+        .chat-box { background-color: var(--bg-main); border-radius: 12px; border: 1px solid var(--glass-border); height: 500px; overflow-y: auto; padding: 20px; margin-top: 20px; display: flex; flex-direction: column; gap: 20px; box-shadow: inset 0 5px 15px rgba(0,0,0,0.5);}
+        .chat-box::-webkit-scrollbar { width: 8px; }
+        .chat-box::-webkit-scrollbar-thumb { background: var(--bg-tertiary); border-radius: 4px; }
+        
+        .message { display: flex; gap: 15px; position: relative; background: rgba(30, 33, 54, 0.3); padding: 15px; border-radius: 8px; border: 1px solid var(--glass-border);}
+        .avatar { width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, var(--blurple), #eb459e); display: flex; align-items: center; justify-content: center; font-weight: 900; color: white; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.3);}
+        .msg-content { display: flex; flex-direction: column; width: 100%;}
+        .msg-header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
+        .msg-author { font-weight: 800; color: var(--text-header); font-size: 15px; }
+        .msg-date { font-size: 12px; color: var(--text-muted); font-weight: 600;}
+        .msg-text { font-size: 15px; color: var(--text-normal); line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+        .gap-indicator { position: absolute; top: -12px; left: 20px; background: var(--bg-tertiary); padding: 3px 10px; border-radius: 12px; font-size: 11px; color: var(--text-muted); border: 1px solid var(--glass-border); font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
+
+        /* --- FAQ --- */
+        .faq-section { max-width: 800px; margin: 60px auto 100px; padding: 0 20px; scroll-margin-top: 100px;}
+        .faq-title { font-size: 28px; font-weight: 900; color: var(--text-header); text-align: center; margin-bottom: 30px;}
+        .faq-item { background: var(--bg-tertiary); border: 1px solid var(--glass-border); border-radius: 12px; margin-bottom: 15px; overflow: hidden; }
+        .faq-q { padding: 20px; font-weight: 800; color: var(--text-header); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .faq-a { padding: 0 20px 20px; color: var(--text-muted); font-size: 15px; line-height: 1.6; display: none; border-top: 1px solid var(--glass-border); margin-top: 10px; padding-top: 20px;}
+        .faq-item.active .faq-a { display: block; }
+        .faq-item.active .faq-icon { transform: rotate(180deg); }
+        .faq-icon { transition: transform 0.3s; color: var(--blurple); }
+
+        /* Footer */
+        footer { text-align: center; padding: 40px; color: var(--text-muted); font-size: 13px; border-top: 1px solid var(--glass-border); margin-top: 50px;}
+
+        @media(max-width: 768px) {
+            .hero h1 { font-size: 42px; }
+            .steps-grid { grid-template-columns: 1fr; }
+            .nav-links a { display: none; }
+            .global-banner { grid-template-columns: 1fr; }
+            .stat-grid { grid-template-columns: 1fr; }
+            .filters-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="logo">Retro<span>Log</span></div>
+    <div class="nav-links">
+        <a href="#scanner" data-i18n="nav_scanner">Skaner</a>
+        <a href="#guide" data-i18n="nav_guide">Instrukcja</a>
+        <a href="#faq" data-i18n="nav_faq">FAQ</a>
+        <select class="lang-switch" id="langSwitch" onchange="changeLanguage(this.value)">
+            <option value="pl">🇵🇱 Polski</option>
+            <option value="en">ᴇɴɢ English</option>
+            <option value="es">🇪🇸 Español</option>
+            <option value="de">🇩🇪 Deutsch</option>
+        </select>
+    </div>
+</nav>
+
+<section class="hero">
+    <div class="hero-badge" data-i18n="hero_badge">Pełna Analiza Twojego Konta</div>
+    <h1 data-i18n="hero_title">Odkryj swoją prawdziwą historię na Discordzie!</h1>
+    <p data-i18n="hero_desc">Zastanawiałeś się kiedyś, ile godzin przegadałeś z przyjaciółmi? Kto jest Twoim najlepszym ziomkiem na czacie? Bezpiecznie wrzuć pliki i sprawdź to w kilka sekund!</p>
+    <button class="hero-btn" onclick="scrollToScanner()" data-i18n="hero_btn">👇 Przejdź do Skanera</button>
+    
+    <div class="trust-bar">
+        <div class="trust-item"><span class="trust-icon">🔒</span> <span data-i18n="trust_1">100% Prywatności</span></div>
+        <div class="trust-item"><span class="trust-icon">⚡</span> <span data-i18n="trust_2">Działa w przeglądarce</span></div>
+        <div class="trust-item"><span class="trust-icon">📡</span> <span data-i18n="trust_3">Nikomu nie wysyłamy danych</span></div>
+    </div>
+</section>
+
+<section class="guide-section" id="guide">
+    <h2 class="guide-title" data-i18n="guide_title">🤔 Jak pobrać dane do Skanera?</h2>
+    <a href="https://support.discord.com/hc/pl/articles/360004027692-Z%C4%85danie-kopi-danych" target="_blank" class="external-btn" data-i18n="guide_link">Czytaj oficjalną instrukcję Discorda ↗️</a>
+    
+    <div class="steps-grid">
+        <div class="step-card">
+            <div class="step-num">1</div>
+            <h3 data-i18n="step1_title">1. Poproś o dane</h3>
+            <p data-i18n="step1_desc">Włącz Discorda, wejdź w Ustawienia ⚙️ ➔ Dane i prywatność. Zjedź na dół i kliknij 'Zażądaj moich danych'. Koniecznie zaznacz pola: Wiadomości oraz Twoja Aktywność.</p>
+        </div>
+        <div class="step-card">
+            <div class="step-num">2</div>
+            <h3 data-i18n="step2_title">2. Czekaj (Do 30 dni)</h3>
+            <p data-i18n="step2_desc">Discord potrzebuje czasu. Gdy dostaniesz maila, pobierz plik ZIP na komputer i PAMIĘTAJ, ABY GO WYPAKOWAĆ (Wyodrębnić)!</p>
+        </div>
+        <div class="step-card">
+            <div class="step-num">3</div>
+            <h3 data-i18n="step3_title">3. Wgraj pliki</h3>
+            <p data-i18n="step3_desc">Otwórz wypakowany folder. Wgraj stąd plik 'events' z folderu <i>activity/analytics</i> (lub aktywność) oraz 'index.json' z folderu <i>messages</i> (lub wiadomości).</p>
+        </div>
+    </div>
+</section>
+
+<div class="app-container" id="scanner">
+    <div id="setupView">
+        <div class="input-group">
+            <label data-i18n="input1_label">📁 Krok 1: Główny plik aktywności (Wymagany!)</label>
+            <div class="desc" data-i18n="input1_desc">Szukaj folderu activity (lub aktywność) ➔ analytics ➔ wybierz plik events-....json</div>
+            <input type="file" id="fileEvents" accept=".json">
+        </div>
+
+        <div class="input-group" style="margin-bottom: 35px;">
+            <label data-i18n="input2_label">💬 Krok 2: Plik z nazwami (Zalecany!)</label>
+            <div class="desc" data-i18n="input2_desc">Szukaj folderu messages (lub wiadomości) ➔ wybierz plik index.json</div>
+            <input type="file" id="fileNames" accept=".json">
+        </div>
+
+        <button id="startBtn" class="start-btn" onclick="rozpocznijAnalize()" data-i18n="btn_scan">🚀 Rozpocznij Skanowanie Danych!</button>
+        
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="progress-text" id="progressText">Analiza w toku...</div>
+        </div>
+    </div>
+
+    <div class="dashboard" id="dashboardView">
+        <div class="global-banner">
+            <div>
+                <div class="banner-title" data-i18n="banner_msgs">Wysłane wiadomości</div>
+                <span id="g-msgs">0</span>
+            </div>
+            <div>
+                <div class="banner-title" data-i18n="banner_time">Łączny czas na głosie</div>
+                <span id="g-time">0</span>
+            </div>
+        </div>
+
+        <div class="input-group" style="background: rgba(30,33,54,0.3); padding: 25px; border-radius: 12px; border: 1px solid var(--glass-border);">
+            <label style="color: var(--blurple); font-size: 16px;" data-i18n="filter_title">🔍 Znajdź kanał z listy poniżej:</label>
+            
+            <input type="text" id="searchInput" placeholder="Szukaj nazwy lub ID kanału..." autocomplete="off" data-i18n-placeholder="filter_search">
+            
+            <div class="filters-grid">
+                <select id="filterCategory">
+                    <option value="all" data-i18n="cat_all">Wszystkie czaty</option>
+                    <option value="dm" data-i18n="cat_dm">Wiadomości Prywatne (DM)</option>
+                    <option value="server" data-i18n="cat_server">Serwery Głosowe</option>
+                    <option value="group" data-i18n="cat_group">Grupy Ukryte</option>
+                    <option value="deleted" data-i18n="cat_deleted">Usunięte</option>
+                </select>
+                <select id="sortOption">
+                    <option value="time" data-i18n="sort_time">Od: Najwięcej Czasu</option>
+                    <option value="msgs" data-i18n="sort_msgs">Od: Najwięcej Wiadomości</option>
+                </select>
+                <input type="number" id="minMsgs" placeholder="Min. wiadomości" min="0" data-i18n-placeholder="min_msgs">
+                <input type="number" id="minTime" placeholder="Min. godzin" min="0" data-i18n-placeholder="min_time">
+            </div>
+
+            <div id="channelList" class="channel-list">
+                <div style="padding: 20px; text-align: center; color: var(--text-muted); font-weight: 600;" data-i18n="loading">Ładowanie danych...</div>
+            </div>
+        </div>
+
+        <div id="statsPanel" style="display: none; padding-top: 25px; margin-top: 25px; border-top: 1px solid var(--glass-border);">
+            <h2 id="panelTitle" style="margin-top: 0; margin-bottom: 20px; color: var(--text-header); font-size: 24px; font-weight: 900;">-</h2>
+            
+            <div class="stat-card highlight">
+                <div class="stat-title" data-i18n="stat_time">Czas spędzony na kanale</div>
+                <div class="stat-value" id="r-time">-</div>
+                <div class="stat-sub" data-i18n="stat_time_desc">Suma całego czasu na tym kanale głosowym.</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-title" data-i18n="stat_msgs">Twoje Wiadomości</div>
+                <div class="stat-value" id="r-msgs" style="color: #2ee076;">-</div>
+                <div class="stat-sub" data-i18n="stat_msgs_desc">Wysłane przez Ciebie teksty.</div>
+            </div>
+
+            <div class="stat-grid">
+                <div class="stat-card"><div class="stat-title" data-i18n="stat_ses">Zakończone Sesje</div><div class="stat-value" id="r-sessions">-</div><div class="stat-sub" data-i18n="stat_ses_desc">Ile razy wszedłeś i wyszedłeś.</div></div>
+                <div class="stat-card"><div class="stat-title" data-i18n="stat_days">Aktywne dni</div><div class="stat-value" id="r-days">-</div><div class="stat-sub" data-i18n="stat_days_desc">Unikalne daty wizyt.</div></div>
+                <div class="stat-card"><div class="stat-title" data-i18n="stat_long">Rekordowa rozmowa</div><div class="stat-value" id="r-longest">-</div></div>
+                <div class="stat-card"><div class="stat-title" data-i18n="stat_avg">Średni czas pobytu</div><div class="stat-value" id="r-avg">-</div></div>
+                <div class="stat-card">
+                    <div class="stat-title" data-i18n="stat_lastv">Ostatnie połączenie</div>
+                    <div class="stat-value" id="r-last-voice" style="font-size: 16px;">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title" data-i18n="stat_lastm">Ostatnia wiadomość</div>
+                    <div class="stat-value" id="r-last-msg" style="font-size: 16px;">-</div>
+                </div>
+            </div>
+
+            <div class="chat-section" id="chatSection">
+                <label style="font-size: 18px; color: var(--blurple); font-weight: 900; display: block; margin-bottom: 5px;" data-i18n="chat_title">Odkryj Archiwum</label>
+                <div class="desc" id="chatInstruction" style="margin-bottom: 15px; font-size: 14px;"></div>
+                
+                <input type="file" id="chatFile" accept=".json, .csv" disabled onchange="wczytajCzat()">
+                <div class="chat-box" id="chatBox"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="faq-section" id="faq">
+    <h2 class="faq-title" data-i18n="faq_title">🙋‍♂️ Pytania i Odpowiedzi (FAQ)</h2>
+    
+    <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q"><span data-i18n="faq_q1">Czy Skaner jest w 100% bezpieczny?</span> <span class="faq-icon">▼</span></div>
+        <div class="faq-a" data-i18n="faq_a1">Tak! Ten skaner działa w Twojej przeglądarce. Żadne pliki ani wiadomości nie są wysyłane do internetu.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q"><span data-i18n="faq_q2">Dlaczego na czacie nie widzę tego, co pisali inni?</span> <span class="faq-icon">▼</span></div>
+        <div class="faq-a" data-i18n="faq_a2">To wina RODO! Kiedy pobierasz dane, Discord wysyła tylko Twoje teksty. Prywatność innych jest chroniona.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q"><span data-i18n="faq_q3">Wgrałem plik ZIP i nie działa. Dlaczego?</span> <span class="faq-icon">▼</span></div>
+        <div class="faq-a" data-i18n="faq_a3">Musisz wypakować (wyodrębnić) plik ZIP przed wrzuceniem go do skanera!</div>
+    </div>
+</section>
+
+<footer>
+    RetroLog © 2026. <span data-i18n="footer">Działa lokalnie. Niepowiązane z Discord Inc.</span>
+</footer>
+
+<script>
+    const i18n = {
+        pl: {
+            nav_scanner: "Skaner", nav_guide: "Instrukcja", nav_faq: "FAQ",
+            hero_badge: "Pełna Analiza Konta",
+            hero_title: "Odkryj swoją prawdziwą historię na Discordzie!",
+            hero_desc: "Zastanawiałeś się kiedyś, ile godzin przegadałeś z przyjaciółmi? Kto jest Twoim najlepszym ziomkiem na czacie? Bezpiecznie wrzuć pliki i sprawdź to!",
+            hero_btn: "👇 Przejdź do Skanera",
+            trust_1: "100% Prywatności", trust_2: "Działa w przeglądarce", trust_3: "Dane nie opuszczają Twojego PC",
+            guide_title: "🤔 Jak pobrać dane do Skanera?", guide_link: "Czytaj oficjalną instrukcję Discorda ↗️",
+            step1_title: "1. Poproś o dane", step1_desc: "Włącz Discorda, wejdź w Ustawienia ⚙️ ➔ Dane i prywatność. Zjedź na dół i kliknij 'Zażądaj moich danych'. Koniecznie zaznacz pola: Wiadomości oraz Twoja Aktywność.",
+            step2_title: "2. Czekaj (Do 30 dni)", step2_desc: "Discord potrzebuje czasu. Gdy dostaniesz maila, pobierz plik ZIP na komputer i PAMIĘTAJ, ABY GO WYPAKOWAĆ (Wyodrębnić)!",
+            step3_title: "3. Wgraj pliki", step3_desc: "Otwórz wypakowany folder. Wgraj stąd plik 'events' z folderu <i>activity/analytics</i> (lub aktywność) oraz 'index.json' z folderu <i>messages</i> (lub wiadomości).",
+            input1_label: "📁 Krok 1: Główny plik aktywności (Wymagany!)", input1_desc: "Szukaj folderu activity (lub aktywność) ➔ analytics ➔ wybierz plik events-....json",
+            input2_label: "💬 Krok 2: Plik z nazwami (Zalecany!)", input2_desc: "Szukaj folderu messages (lub wiadomości) ➔ wybierz plik index.json",
+            btn_scan: "🚀 Rozpocznij Skanowanie Danych!", loading: "Ładowanie danych...",
+            banner_msgs: "Wysłane wiadomości", banner_time: "Łączny czas na głosie",
+            filter_title: "🔍 Znajdź kanał z listy poniżej:", filter_search: "Szukaj nazwy lub ID kanału...",
+            cat_all: "Wszystkie czaty", cat_dm: "Wiadomości Prywatne", cat_server: "Serwery Głosowe", cat_group: "Grupy Ukryte", cat_deleted: "Usunięte",
+            sort_time: "Od: Najwięcej Czasu", sort_msgs: "Od: Najwięcej Wiadomości", min_msgs: "Min. wiadomości", min_time: "Min. godzin",
+            stat_time: "Czas spędzony na kanale", stat_time_desc: "Suma całego czasu na tym kanale głosowym.", stat_msgs: "Twoje Wiadomości", stat_msgs_desc: "Wysłane przez Ciebie teksty.",
+            stat_ses: "Zakończone Sesje", stat_ses_desc: "Ile razy wszedłeś i wyszedłeś.", stat_days: "Aktywne dni", stat_days_desc: "Unikalne daty wizyt.",
+            stat_long: "Rekordowa rozmowa", stat_avg: "Średni czas pobytu", stat_lastv: "Ostatnie połączenie", stat_lastm: "Ostatnia wiadomość",
+            chat_title: "Odkryj Archiwum", faq_title: "🙋‍♂️ Pytania i Odpowiedzi (FAQ)",
+            faq_q1: "Czy Skaner jest w 100% bezpieczny?", faq_a1: "Tak! Ten skaner działa w Twojej przeglądarce. Żadne pliki ani wiadomości nie są wysyłane do internetu.",
+            faq_q2: "Dlaczego na czacie nie widzę tego, co pisali inni?", faq_a2: "To wina RODO! Kiedy pobierasz dane, Discord wysyła tylko Twoje teksty. Prywatność innych jest chroniona.",
+            faq_q3: "Wgrałem plik ZIP i nie działa. Dlaczego?", faq_a3: "Musisz wypakować (wyodrębnić) plik ZIP przed wrzuceniem go do skanera!",
+            footer: "Działa lokalnie. Niepowiązane z Discord Inc.",
+            del_chat: "🗑️ Usunięta Konwersacja", hidden_group: "🔒 Nienazwana Grupa / Ukryta", unknown_group: "Nieznana Grupa", del_user: "Usunięty Użytkownik",
+            chat_wait: "Wgraj plik, by załadować czat!", chat_loading: "Ładowanie...", chat_empty: "Pusty plik / Brak wiadomości.", chat_error: "Błąd odczytu pliku.", chat_you: "Ja", chat_attachment: "Załącznik", chat_hidden: "Ukryto (Prywatność)", chat_duration: "(+ trwała: ", hidden_results: "wyników ukrytych (Użyj filtrów)", scanning: "Skanowanie", err_no_file: "Błąd! Wgraj główny plik 'events'.", err_zip: "Błąd! Wypakuj najpierw plik ZIP!"
+        },
+        en: {
+            nav_scanner: "Scanner", nav_guide: "Guide", nav_faq: "FAQ",
+            hero_badge: "Full Account Analysis",
+            hero_title: "Discover your true Discord history!",
+            hero_desc: "Ever wondered how many hours you've talked with friends? Drop your files safely and check it out in seconds!",
+            hero_btn: "👇 Go to Scanner",
+            trust_1: "100% Privacy", trust_2: "Runs in your browser", trust_3: "No data uploaded online",
+            guide_title: "🤔 How to get data?", guide_link: "Read official Discord guide ↗️",
+            step1_title: "1. Request Data", step1_desc: "Go to Settings ⚙️ ➔ Data & Privacy. Scroll down and click 'Request Data'. Make sure to check: Messages and Your Activity.",
+            step2_title: "2. Wait (Up to 30 days)", step2_desc: "Discord needs time. When you get the email, download the ZIP and EXTRACT IT (Unzip)!",
+            step3_title: "3. Upload files", step3_desc: "Open the extracted folder. Upload the 'events' file from the <i>activity/analytics</i> folder and 'index.json' from the <i>messages</i> folder.",
+            input1_label: "📁 Step 1: Main Activity File (Required!)", input1_desc: "Find the folder activity ➔ analytics ➔ select the file events-....json",
+            input2_label: "💬 Step 2: Names Dictionary (Recommended!)", input2_desc: "Find the folder messages ➔ select the file index.json",
+            btn_scan: "🚀 Start Scanning Data!", loading: "Loading data...",
+            banner_msgs: "Total Messages Sent", banner_time: "Total Voice Time",
+            filter_title: "🔍 Find a channel below:", filter_search: "Search name or Channel ID...",
+            cat_all: "All Chats", cat_dm: "Direct Messages", cat_server: "Voice Servers", cat_group: "Hidden Groups", cat_deleted: "Deleted",
+            sort_time: "Sort: Most Time Spent", sort_msgs: "Sort: Most Messages", min_msgs: "Min. messages", min_time: "Min. hours",
+            stat_time: "Time spent here", stat_time_desc: "Sum of all voice sessions.", stat_msgs: "Your Messages", stat_msgs_desc: "Total texts sent by you.",
+            stat_ses: "Completed Sessions", stat_ses_desc: "Valid joins and leaves.", stat_days: "Active Days", stat_days_desc: "Unique dates visited.",
+            stat_long: "Longest Session", stat_avg: "Average Stay", stat_lastv: "Last Voice Call", stat_lastm: "Last Message",
+            chat_title: "Chat Archive", faq_title: "🙋‍♂️ Frequently Asked Questions (FAQ)",
+            faq_q1: "Is this Scanner 100% safe?", faq_a1: "Yes! It runs entirely locally in your browser. No files are uploaded to any server.",
+            faq_q2: "Why can't I see my friends' messages?", faq_a2: "Privacy laws (GDPR)! Discord only gives you your own data. Friends' messages belong to them.",
+            faq_q3: "I uploaded the ZIP but it fails. Why?", faq_a3: "You must extract (unzip) the file first before uploading the JSON files!",
+            footer: "Runs locally. Not affiliated with Discord Inc.",
+            del_chat: "🗑️ Deleted Chat", hidden_group: "🔒 Unnamed Group / Hidden", unknown_group: "Unknown Group", del_user: "Deleted User",
+            chat_wait: "Upload file to load chat!", chat_loading: "Loading...", chat_empty: "Empty file / No messages.", chat_error: "File read error.", chat_you: "Me", chat_attachment: "Attachment", chat_hidden: "Hidden (Privacy)", chat_duration: "(+ lasted: ", hidden_results: "more results hidden (Use filters)", scanning: "Scanning", err_no_file: "Error! Upload 'events' file.", err_zip: "Error! Extract ZIP first!"
+        },
+        es: {
+            nav_scanner: "Escáner", nav_guide: "Guía", nav_faq: "Preguntas",
+            hero_badge: "Análisis Completo",
+            hero_title: "¡Descubre tu verdadera historia en Discord!",
+            hero_desc: "¿Te has preguntado cuántas horas hablas con tus amigos? ¡Sube tus archivos de forma segura y descúbrelo en segundos!",
+            hero_btn: "👇 Ir al Escáner",
+            trust_1: "100% Privacidad", trust_2: "En tu navegador", trust_3: "Sin subir a internet",
+            guide_title: "🤔 ¿Cómo obtener los datos?", guide_link: "Guía oficial de Discord ↗️",
+            step1_title: "1. Pedir Datos", step1_desc: "Ve a Ajustes ⚙️ ➔ Datos y privacidad. Baja y haz clic en 'Solicitar datos'. ¡Asegúrate de marcar: Mensajes y Tu Actividad!",
+            step2_title: "2. Espera (Hasta 30 días)", step2_desc: "Discord necesita tiempo. Cuando llegue el email, descarga el ZIP y ¡EXTRAELO (Descomprimir)!",
+            step3_title: "3. Subir aquí", step3_desc: "Abre la carpeta extraída. Sube el archivo 'events' de la carpeta <i>activity/analytics</i> (o actividad) y 'index.json' de <i>messages</i> (o mensajes).",
+            input1_label: "📁 Paso 1: Archivo Principal (¡Obligatorio!)", input1_desc: "Busca la carpeta activity (o actividad) ➔ analytics ➔ elige events-....json",
+            input2_label: "💬 Paso 2: Diccionario (¡Recomendado!)", input2_desc: "Busca la carpeta messages (o mensajes) ➔ elige index.json",
+            btn_scan: "🚀 ¡Empezar a Escanear!", loading: "Cargando...",
+            banner_msgs: "Mensajes Enviados", banner_time: "Tiempo en Voz",
+            filter_title: "🔍 Busca un canal abajo:", filter_search: "Buscar nombre o ID del canal...",
+            cat_all: "Todo", cat_dm: "Mensajes Directos", cat_server: "Servidores", cat_group: "Grupos Ocultos", cat_deleted: "Borrados",
+            sort_time: "Por: Más Tiempo", sort_msgs: "Por: Más Mensajes", min_msgs: "Min. mensajes", min_time: "Min. horas",
+            stat_time: "Tiempo pasado aquí", stat_time_desc: "Suma de todas las sesiones.", stat_msgs: "Tus Mensajes", stat_msgs_desc: "Total de textos enviados.",
+            stat_ses: "Sesiones", stat_ses_desc: "Entradas y salidas.", stat_days: "Días activos", stat_days_desc: "Fechas únicas.",
+            stat_long: "Sesión más larga", stat_avg: "Estancia Media", stat_lastv: "Última Llamada", stat_lastm: "Último Mensaje",
+            chat_title: "Archivo de Chat", faq_title: "🙋‍♂️ Preguntas Frecuentes (FAQ)",
+            faq_q1: "¿Es 100% seguro?", faq_a1: "¡Sí! Funciona en tu navegador localmente. Ningún archivo se sube a internet.",
+            faq_q2: "¿Por qué no veo lo que dicen mis amigos?", faq_a2: "¡Por privacidad! Discord solo te da tus propios datos.",
+            faq_q3: "Subí el ZIP y no va. ¿Por qué?", faq_a3: "¡Debes extraer (descomprimir) el archivo ZIP primero!",
+            footer: "Se ejecuta localmente. No afiliado a Discord Inc.",
+            del_chat: "🗑️ Chat Borrado", hidden_group: "🔒 Grupo sin nombre", unknown_group: "Grupo Desconocido", del_user: "Usuario Borrado",
+            chat_wait: "¡Sube archivo para cargar chat!", chat_loading: "Cargando...", chat_empty: "Archivo vacío / Sin mensajes.", chat_error: "Error al leer el archivo.", chat_you: "Yo", chat_attachment: "Adjunto", chat_hidden: "Oculto (Privacidad)", chat_duration: "(+ duró: ", hidden_results: "resultados ocultos (Usa filtros)", scanning: "Escaneando", err_no_file: "¡Sube el archivo 'events'!", err_zip: "¡Extrae el ZIP primero!"
+        },
+        de: {
+            nav_scanner: "Scanner", nav_guide: "Anleitung", nav_faq: "FAQ",
+            hero_badge: "Vollständige Analyse",
+            hero_title: "Entdecke deine wahre Discord-Geschichte!",
+            hero_desc: "Hast du dich je gefragt, wie viele Stunden du geredet hast? Lade deine Dateien sicher hoch und finde es heraus!",
+            hero_btn: "👇 Zum Scanner",
+            trust_1: "100% Privatsphäre", trust_2: "Läuft im Browser", trust_3: "Keine Uploads",
+            guide_title: "🤔 Wie bekomme ich die Daten?", guide_link: "Offizielle Discord-Anleitung ↗️",
+            step1_title: "1. Daten anfordern", step1_desc: "Gehe zu Einstellungen ⚙️ ➔ Daten & Privatsphäre. Scrolle nach unten und klicke auf 'Daten anfordern'. Wähle unbedingt aus: Nachrichten und Deine Aktivität.",
+            step2_title: "2. Warten (Bis zu 30 Tage)", step2_desc: "Es braucht Zeit. Wenn die E-Mail kommt, lade die ZIP herunter und ENTPACKE sie!",
+            step3_title: "3. Hochladen", step3_desc: "Öffne den entpackten Ordner. Lade 'events' aus <i>activity/analytics</i> (oder Aktivität) und 'index.json' aus <i>messages</i> (oder Nachrichten) hoch.",
+            input1_label: "📁 Schritt 1: Hauptdatei (Erforderlich!)", input1_desc: "Suche den Ordner activity (oder Aktivität) ➔ analytics ➔ wähle events-....json",
+            input2_label: "💬 Schritt 2: Wörterbuch (Empfohlen!)", input2_desc: "Suche den Ordner messages (oder Nachrichten) ➔ wähle index.json",
+            btn_scan: "🚀 Scan Starten!", loading: "Laden...",
+            banner_msgs: "Gesendete Nachrichten", banner_time: "Sprachzeit Gesamt",
+            filter_title: "🔍 Finde einen Kanal:", filter_search: "Suche nach Name oder Kanal-ID...",
+            cat_all: "Alle", cat_dm: "Direktnachrichten", cat_server: "Server", cat_group: "Versteckte Gruppen", cat_deleted: "Gelöscht",
+            sort_time: "Sortieren: Meiste Zeit", sort_msgs: "Sortieren: Meiste Nachrichten", min_msgs: "Min. Nachrichten", min_time: "Min. Stunden",
+            stat_time: "Verbrachte Zeit", stat_time_desc: "Summe aller Sprachsitzungen.", stat_msgs: "Deine Nachrichten", stat_msgs_desc: "Gesamtzahl der gesendeten Texte.",
+            stat_ses: "Sitzungen", stat_ses_desc: "Gültige Teilnahmen.", stat_days: "Aktive Tage", stat_days_desc: "Einzigartige Daten.",
+            stat_long: "Längste Sitzung", stat_avg: "Durchschnitt", stat_lastv: "Letzter Anruf", stat_lastm: "Letzte Nachricht",
+            chat_title: "Chat-Archiv", faq_title: "🙋‍♂️ Häufig gestellte Fragen (FAQ)",
+            faq_q1: "Ist dieser Scanner 100% sicher?", faq_a1: "Ja! Er läuft lokal. Es werden keine Daten hochgeladen.",
+            faq_q2: "Warum sehe ich die Nachrichten meiner Freunde nicht?", faq_a2: "Datenschutz (DSGVO)! Discord gibt dir nur deine eigenen Daten.",
+            faq_q3: "Ich habe die ZIP hochgeladen, es geht nicht.", faq_a3: "Du musst die ZIP-Datei zuerst entpacken!",
+            footer: "Läuft lokal. Nicht mit Discord Inc. verbunden.",
+            del_chat: "🗑️ Gelöschter Chat", hidden_group: "🔒 Unbenannte Gruppe", unknown_group: "Unbekannte Gruppe", del_user: "Gelöschter Benutzer",
+            chat_wait: "Lade Datei hoch für Chat!", chat_loading: "Lädt...", chat_empty: "Leere Datei / Keine Nachrichten.", chat_error: "Dateilesefehler.", chat_you: "Ich", chat_attachment: "Anhang", chat_hidden: "Versteckt (Datenschutz)", chat_duration: "(+ dauerte: ", hidden_results: "weitere Ergebnisse (Nutze Filter)", scanning: "Scannen", err_no_file: "Lade die 'events'-Datei hoch!", err_zip: "Bitte ZIP zuerst entpacken!"
+        }
+    };
+    
+    let obecnyJezyk = 'pl';
+
+    function t(klucz) {
+        return i18n[obecnyJezyk][klucz] || klucz;
+    }
+
+    function changeLanguage(lang) {
+        obecnyJezyk = lang;
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            el.innerHTML = t(el.getAttribute('data-i18n'));
+        });
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
+        });
+        if(globalnaBazaPosortowana.length > 0) renderujListeKanalow();
+    }
+
+    function scrollToScanner() {
+        const skaner = document.getElementById('scanner');
+        skaner.scrollIntoView({ behavior: 'smooth' });
+        skaner.style.boxShadow = '0 0 60px rgba(88, 101, 242, 0.8)';
+        setTimeout(() => { skaner.style.boxShadow = '0 20px 50px rgba(0,0,0,0.5)'; }, 1500);
+    }
+
+    function toggleFaq(element) {
+        element.classList.toggle('active');
+    }
+
+    let bazaDanychKanalow = {};
+    let slownikNazw = {};
+    let globalnaBazaPosortowana = []; 
+
+    function formatujCzasGlosowy(czasWMilisekundach) {
+        if (!czasWMilisekundach || czasWMilisekundach === 0) return "0s";
+        let h = Math.floor(czasWMilisekundach / (1000 * 60 * 60));
+        let m = Math.floor((czasWMilisekundach / (1000 * 60)) % 60);
+        let s = Math.floor((czasWMilisekundach / 1000) % 60);
+        let wyn = [];
+        if (h > 0) wyn.push(`${h}h`);
+        if (m > 0) wyn.push(`${m}m`);
+        if (s > 0) wyn.push(`${s}s`);
+        return wyn.join(" ");
+    }
+
+    function formatujDate(ms) {
+        if (!ms || ms === Infinity || isNaN(ms) || ms === 0) return "-";
+        return new Date(ms).toLocaleString(obecnyJezyk === 'en' ? 'en-US' : 'pl-PL', { timeZone: 'Europe/Warsaw', dateStyle: 'medium', timeStyle: 'short' });
+    }
+
+    function pobierzZrozumialaNazwe(id) {
+        let nazwa = slownikNazw[id];
+        if (id === "None") return t("del_chat");
+        if (nazwa === "None" || nazwa === "null") return `${t('hidden_group')} (ID: ${id})`;
+        if (!nazwa) return `${t('unknown_group')} (ID: ${id})`;
+        if (nazwa.includes("Unknown Participant")) return t("del_user");
+        if (nazwa.startsWith("Direct Message with ")) return "DM: " + nazwa.replace("Direct Message with ", "");
+        return nazwa;
+    }
+
+    function pobierzKategorie(nazwa) {
+        const delStr = t("del_chat");
+        const hiddenStr = t("hidden_group");
+        const unknownStr = t("unknown_group");
+        const userStr = t("del_user");
+        
+        if (nazwa.includes("🗑️") || nazwa === delStr) return "deleted";
+        if (nazwa.includes("🔒") || nazwa.includes(hiddenStr.split(" ")[1]) || nazwa.includes(unknownStr.split(" ")[1])) return "group";
+        if (nazwa.startsWith("DM:") || nazwa === userStr) return "dm";
+        return "server"; 
+    }
+
+    function renderujListeKanalow() {
+        const list = document.getElementById('channelList');
+        list.innerHTML = "";
+
+        const searchVal = document.getElementById('searchInput').value.toLowerCase();
+        const categoryVal = document.getElementById('filterCategory').value;
+        const sortVal = document.getElementById('sortOption').value;
+        const minMsgs = parseInt(document.getElementById('minMsgs').value) || 0;
+        const minTimeMs = (parseInt(document.getElementById('minTime').value) || 0) * 3600000;
+
+        let przefiltrowane = globalnaBazaPosortowana.filter(st => {
+            const nazwa = pobierzZrozumialaNazwe(st.id);
+            const kategoria = pobierzKategorie(nazwa);
+
+            if (searchVal && !nazwa.toLowerCase().includes(searchVal) && !st.id.includes(searchVal)) return false;
+            if (categoryVal !== 'all' && kategoria !== categoryVal) return false;
+            if (st.msgCount < minMsgs) return false;
+            if (st.totalVoiceMs < minTimeMs) return false;
+            return true;
+        });
+
+        przefiltrowane.sort((a, b) => {
+            if (sortVal === 'msgs') {
+                if (b.msgCount !== a.msgCount) return b.msgCount - a.msgCount;
+                return b.totalVoiceMs - a.totalVoiceMs;
+            } else {
+                if (b.totalVoiceMs !== a.totalVoiceMs) return b.totalVoiceMs - a.totalVoiceMs;
+                return b.msgCount - a.msgCount;
+            }
+        });
+
+        if (przefiltrowane.length === 0) {
+            list.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--warning); font-weight:bold;">Brak wyników / No results.</div>`;
+            return;
+        }
+
+        const maxDoWyswietlenia = Math.min(przefiltrowane.length, 1000);
+
+        for (let i = 0; i < maxDoWyswietlenia; i++) {
+            const st = przefiltrowane[i];
+            const nazwa = pobierzZrozumialaNazwe(st.id);
+            const el = document.createElement('div');
+            el.className = 'dropdown-item';
+            el.innerHTML = `<span class="item-name">${nazwa}</span><span class="item-stats">${formatujCzasGlosowy(st.totalVoiceMs)} | ${st.msgCount.toLocaleString('pl-PL')} msg.</span>`;
+            el.onclick = () => { 
+                document.getElementById('searchInput').value = nazwa;
+                wyswietlWynikiDlaID(st.id, nazwa); 
+            };
+            list.appendChild(el);
+        }
+
+        if(przefiltrowane.length > 1000) {
+            const el = document.createElement('div');
+            el.style = "padding: 15px; text-align: center; color: var(--text-muted); font-size: 13px; font-weight:bold;";
+            el.innerText = `+ ${przefiltrowane.length - 1000} ${t('hidden_results')}`;
+            list.appendChild(el);
+        }
+    }
+
+    document.getElementById('searchInput').addEventListener('input', renderujListeKanalow);
+    document.getElementById('filterCategory').addEventListener('change', renderujListeKanalow);
+    document.getElementById('sortOption').addEventListener('change', renderujListeKanalow);
+    document.getElementById('minMsgs').addEventListener('input', renderujListeKanalow);
+    document.getElementById('minTime').addEventListener('input', renderujListeKanalow);
+
+    async function rozpocznijAnalize() {
+        const plikZLogami = document.getElementById('fileEvents');
+        const plikZNazwami = document.getElementById('fileNames');
+        const przyciskStart = document.getElementById('startBtn');
+        const pContainer = document.getElementById('progressContainer');
+        const pFill = document.getElementById('progressFill');
+        const pText = document.getElementById('progressText');
+
+        if (!plikZLogami.files.length) { alert(t('err_no_file')); return; }
+        if (plikZLogami.files[0].name.endsWith('.zip')) { alert(t('err_zip')); return; }
+        
+        przyciskStart.disabled = true;
+        pContainer.style.display = 'block';
+
+        if (plikZNazwami.files.length) {
+            try { slownikNazw = JSON.parse(await plikZNazwami.files[0].text()); } catch (e) {}
+        }
+
+        try {
+            const ROZMIAR_PORCJI = 5 * 1024 * 1024; 
+            let przesuniecieBytes = 0;
+            let niedokonczonaLinijka = "";
+            const dekoder = new TextDecoder('utf-8');
+            let gWiadomosci = 0;
+            let gCzas = 0;
+
+            while (przesuniecieBytes < plikZLogami.files[0].size) {
+                const porcja = plikZLogami.files[0].slice(przesuniecieBytes, przesuniecieBytes + ROZMIAR_PORCJI);
+                const tekstPorcji = dekoder.decode(await porcja.arrayBuffer(), { stream: true });
+                const linijki = (niedokonczonaLinijka + tekstPorcji).split('\n');
+                niedokonczonaLinijka = linijki.pop();
+
+                for (const linia of linijki) {
+                    if (linia.length < 20 || (!linia.includes('"message_sent"') && !linia.includes('"send_message"') && !linia.includes('"join_voice_channel"') && !linia.includes('"leave_voice_channel"'))) continue;
+
+                    try {
+                        const zd = JSON.parse(linia);
+                        const typ = String(zd.event_type || zd.event_name || "").toLowerCase();
+                        const idK = String(zd.channel_id || zd.channel || "");
+                        
+                        if (!idK || idK === "null" || idK === "undefined" || idK === "None") continue;
+
+                        const msg = typ.includes("message_sent") || typ.includes("send_message");
+                        const join = typ.includes("join_voice_channel");
+                        const leave = typ.includes("leave_voice_channel");
+
+                        if (!msg && !join && !leave) continue;
+                        if (msg) gWiadomosci++;
+
+                        if (!bazaDanychKanalow[idK]) bazaDanychKanalow[idK] = { msgCount: 0, voiceEvents: [], lastMsg: 0, lastVoice: 0, firstActive: Infinity, activeDaysSet: new Set() };
+                        let st = bazaDanychKanalow[idK];
+                        let dStr = zd.timestamp || zd.client_track_timestamp;
+
+                        if (dStr) {
+                            dStr = dStr.replace(/"/g, '').replace(/\\/g, '').replace(' ', 'T');
+                            if (!dStr.endsWith('Z') && !dStr.match(/[+-]\d\d:?\d\d$/)) dStr += 'Z';
+                            
+                            const ms = new Date(dStr).getTime();
+                            if (!isNaN(ms)) {
+                                const d = new Date(ms);
+                                st.activeDaysSet.add(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`);
+                                if (ms < st.firstActive) st.firstActive = ms;
+                                
+                                if (msg) { st.msgCount++; if (ms > st.lastMsg) st.lastMsg = ms; } 
+                                else if (join) { st.voiceEvents.push({ time: ms, type: "join" }); if (ms > st.lastVoice) st.lastVoice = ms; } 
+                                else if (leave) { st.voiceEvents.push({ time: ms, type: "leave" }); if (ms > st.lastVoice) st.lastVoice = ms; }
+                            }
+                        }
+                    } catch(e) {}
+                }
+                przesuniecieBytes += ROZMIAR_PORCJI;
+                let procent = Math.min(100, Math.round((przesuniecieBytes / plikZLogami.files[0].size) * 100));
+                pFill.style.width = procent + '%';
+                pText.innerText = `${t('scanning')}: ${procent}%`;
+                await new Promise(r => setTimeout(r, 1));
+            }
+
+            globalnaBazaPosortowana = [];
+            for (const [id, st] of Object.entries(bazaDanychKanalow)) {
+                st.voiceEvents.sort((a, b) => a.time - b.time);
+                let inCh = false, lastJoin = 0;
+                st.totalVoiceMs = 0; st.longestVoiceMs = 0; st.validSessions = 0;
+                st.lastSessionStart = 0; st.lastSessionDuration = 0;
+
+                for (const ev of st.voiceEvents) {
+                    if (ev.type === 'join') { lastJoin = ev.time; inCh = true; } 
+                    else if (ev.type === 'leave' && inCh) {
+                        const dur = ev.time - lastJoin;
+                        if (dur > 0 && dur < (7 * 24 * 60 * 60 * 1000)) {
+                            st.totalVoiceMs += dur; st.validSessions++;
+                            if (dur > st.longestVoiceMs) st.longestVoiceMs = dur;
+                            st.lastSessionStart = lastJoin; st.lastSessionDuration = dur;
+                        }
+                        inCh = false;
+                    }
+                }
+                gCzas += st.totalVoiceMs;
+                if (st.msgCount === 0 && st.totalVoiceMs === 0) continue;
+                st.id = id;
+                globalnaBazaPosortowana.push(st);
+            }
+
+            document.getElementById('setupView').style.display = 'none';
+            document.querySelector('.hero').style.display = 'none';
+            document.getElementById('dashboardView').style.display = 'block';
+            document.getElementById('g-msgs').innerText = gWiadomosci.toLocaleString('pl-PL');
+            document.getElementById('g-time').innerText = formatujCzasGlosowy(gCzas);
+
+            renderujListeKanalow();
+            window.scrollTo({top: 0, behavior: 'smooth'});
+
+        } catch (e) { alert("Wystąpił błąd: " + e.message); przyciskStart.disabled = false; }
+    }
+
+    function wyswietlWynikiDlaID(id, nazwa) {
+        document.getElementById('statsPanel').style.display = 'block';
+        document.getElementById('panelTitle').innerText = nazwa;
+        
+        const st = bazaDanychKanalow[id];
+        const eAvg = st.validSessions > 0 ? (st.totalVoiceMs / st.validSessions) : 0;
+
+        document.getElementById('r-time').innerText = formatujCzasGlosowy(st.totalVoiceMs);
+        document.getElementById('r-msgs').innerText = st.msgCount.toLocaleString('pl-PL');
+        document.getElementById('r-longest').innerText = formatujCzasGlosowy(st.longestVoiceMs);
+        document.getElementById('r-avg').innerText = formatujCzasGlosowy(eAvg);
+        document.getElementById('r-sessions').innerText = st.validSessions.toLocaleString('pl-PL');
+        document.getElementById('r-days').innerText = st.activeDaysSet.size.toLocaleString('pl-PL');
+        document.getElementById('r-last-msg').innerText = formatujDate(st.lastMsg);
+
+        let htmlOstatniaRozmowa = "-";
+        if (st.lastSessionStart > 0) {
+            htmlOstatniaRozmowa = `${formatujDate(st.lastSessionStart)}<br><span style="font-size: 13px; font-weight: 600; color: var(--blurple);">${t('chat_duration')} ${formatujCzasGlosowy(st.lastSessionDuration)})</span>`;
+        } else if (st.lastVoice > 0) {
+            htmlOstatniaRozmowa = `${formatujDate(st.lastVoice)}<br><span style="font-size: 13px; font-weight: normal; color: var(--warning);">⚠️</span>`;
+        }
+        document.getElementById('r-last-voice').innerHTML = htmlOstatniaRozmowa;
+
+        document.getElementById('chatSection').style.display = 'block';
+        document.getElementById('chatFile').disabled = false;
+        document.getElementById('chatFile').value = ""; 
+        document.getElementById('chatInstruction').innerHTML = `<code>messages/c${id}/messages.json</code>`;
+        document.getElementById('chatBox').innerHTML = `<div style="text-align: center; color: var(--text-muted); margin: auto; font-weight: 600;">${t('chat_wait')}</div>`;
+        
+        document.getElementById('statsPanel').scrollIntoView({behavior: "smooth"});
+    }
+
+    async function wczytajCzat() {
+        const file = document.getElementById('chatFile').files[0];
+        if (!file) return;
+        const chatBox = document.getElementById('chatBox');
+        chatBox.innerHTML = `<div style="text-align: center; color: var(--blurple); margin: auto; font-weight: 800; font-size: 18px;">${t('chat_loading')}</div>`;
+        const text = await file.text();
+        let msgs = [];
+        try {
+            if (file.name.endsWith('.json')) {
+                JSON.parse(text).forEach(m => msgs.push({czas: m.Timestamp || m.timestamp, tresc: m.Contents || m.content || "", zalacznik: m.Attachments || m.attachments || ""}));
+            } else {
+                text.split('\n').slice(1).forEach(row => {
+                    const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                    if (cols.length >= 3) msgs.push({czas: cols[1], tresc: cols[2].replace(/"/g, ''), zalacznik: cols[3] || ""});
+                });
+            }
+            
+            if (msgs.length === 0) { chatBox.innerHTML = `<div style="text-align: center; color: var(--warning); margin: auto; font-weight: bold;">${t('chat_empty')}</div>`; return; }
+
+            chatBox.innerHTML = "";
+            msgs.reverse().forEach(m => {
+                if (!m.tresc.trim() && !m.zalacznik.trim()) return;
+                const div = document.createElement('div');
+                div.className = 'message';
+                div.innerHTML = `
+                    <div class="gap-indicator">🔒 ${t('chat_hidden')}</div>
+                    <div class="avatar">${t('chat_you')}</div>
+                    <div class="msg-content">
+                        <div class="msg-header"><span class="msg-author">${t('chat_you')}</span><span class="msg-date">${formatujDate(new Date(m.czas))}</span></div>
+                        <div class="msg-text">${m.tresc}</div>
+                        ${m.zalacznik ? `<a href="${m.zalacznik}" target="_blank" class="msg-attachment">📎 ${t('chat_attachment')}</a>` : ""}
+                    </div>`;
+                chatBox.appendChild(div);
+            });
+            chatBox.scrollTop = chatBox.scrollHeight;
+        } catch(e) { chatBox.innerHTML = `<div style="text-align: center; color: var(--warning); margin: auto; font-weight: bold;">${t('chat_error')}</div>`; }
+    }
+</script>
+
+</body>
+</html>
